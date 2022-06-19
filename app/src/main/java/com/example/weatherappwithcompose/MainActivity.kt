@@ -1,104 +1,82 @@
 package com.example.weatherappwithcompose
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherappwithcompose.graphs.RootNavGraph
 import com.example.weatherappwithcompose.ui.theme.WeatherAppWithComposeTheme
-import com.example.weatherappwithcompose.view_model.MainViewModel
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-
-private lateinit var viewModel: MainViewModel
-private lateinit var fusedLocationClient: FusedLocationProviderClient
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         setContent {
             WeatherAppWithComposeTheme {
-                RootNavGraph(navController = rememberNavController())
-            }
-        }
-
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            findLocation()
-            collectTheResponse()
-        } else {
-            fetchLocation()
-        }
-    }
-
-    private fun collectTheResponse() {
-        lifecycleScope.launch {
-            viewModel.state.collect { state ->
-                if (!state.isLoading) {
-                    if (state.hasInternet) {
-                        if (state.error.isNotBlank()) {
-                            println(state.error)
-                        } else {
-                            println(state.weather!!.daily[0].temp)
-                        }
-                    } else {
-                        println(state.error)
-                    }
-                }
+                MultiplePermission()
             }
         }
     }
 
-    private fun fetchLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) !=
-            PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_COARSE_LOCATION
-            ) !=
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            requestMultiplePermissions.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Composable
+    private fun MultiplePermission() {
+        val locationPermissionsState = rememberMultiplePermissionsState(
+            listOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
             )
-            return
-        }
-    }
+        )
+        if (locationPermissionsState.allPermissionsGranted) {
+            RootNavGraph(navController = rememberNavController())
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                val allPermissionsRevoked =
+                    locationPermissionsState.permissions.size ==
+                            locationPermissionsState.revokedPermissions.size
 
-    private val requestMultiplePermissions =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            permissions.entries.forEach {
-                if (it.key == Manifest.permission.ACCESS_FINE_LOCATION && it.value
-                ) {
-                    findLocation()
-                    collectTheResponse()
+                val textToShow = if (!allPermissionsRevoked) {
+                    // If not all the permissions are revoked, it's because the user accepted the COARSE
+                    // location permission, but not the FINE one.
+                    "Yay! Thanks for letting me access your approximate location. " +
+                            "But you know what would be great? If you allow me to know where you " +
+                            "exactly are. Thank you!"
+                } else if (locationPermissionsState.shouldShowRationale) {
+                    // Both location permissions have been denied
+                    "Getting your exact location is important for this app. " +
+                            "Please grant us fine location. Thank you :D"
+                } else {
+                    // First time the user sees this feature or the user doesn't want to be asked again
+                    "This feature requires location permission"
+                }
+
+                val buttonText = if (!allPermissionsRevoked) {
+                    "Allow precise location"
+                } else {
+                    "Request permissions"
+                }
+
+                Text(text = textToShow)
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { locationPermissionsState.launchMultiplePermissionRequest() }) {
+                    Text(buttonText)
                 }
             }
         }
-
-    private fun findLocation() {
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                location?.let {
-                    println(location)
-                }
-            }
     }
 }
