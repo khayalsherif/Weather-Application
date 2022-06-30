@@ -1,10 +1,14 @@
 package com.example.weatherappwithcompose.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -13,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherappwithcompose.BottomBarScreen
 import com.example.weatherappwithcompose.graphs.MainNavGraph
+import com.example.weatherappwithcompose.ui.theme.app_theme.AppTheme
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -20,7 +25,13 @@ fun MainScreen(navController: NavHostController = rememberNavController()) {
     Scaffold(
         bottomBar = { BottomBar(navController = navController) }
     ) {
-        MainNavGraph(navController = navController)
+        Box(
+            modifier = Modifier
+                .padding(bottom = AppTheme.dimensions.padding55)
+                .fillMaxSize()
+        ) {
+            MainNavGraph(navController = navController)
+        }
     }
 }
 

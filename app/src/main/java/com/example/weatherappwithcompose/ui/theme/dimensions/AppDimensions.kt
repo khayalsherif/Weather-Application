@@ -13,6 +13,7 @@ data class AppDimensions(
     val paddingXXL: Dp = 24.dp,
     val paddingXXXL: Dp = 36.dp,
     val padding50: Dp = 50.dp,
+    val padding55: Dp = 55.dp,
     val padding100: Dp = 100.dp
 )
 

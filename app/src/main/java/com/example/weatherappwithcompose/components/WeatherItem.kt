@@ -22,7 +22,7 @@ fun WeatherItem(
     Card(
         backgroundColor = Color.Transparent,
         elevation = 0.dp,
-        modifier = Modifier.padding(start = 16.dp, top = 32.dp)
+        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_weather_background),
