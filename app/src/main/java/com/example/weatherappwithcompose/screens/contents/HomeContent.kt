@@ -1,16 +1,21 @@
 package com.example.weatherappwithcompose.screens.contents
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Brush
 import com.example.weatherappwithcompose.components.WeatherItem
+import com.example.weatherappwithcompose.model.WeatherState
 import com.example.weatherappwithcompose.screens.state_contents.EmptyDataContent
 import com.example.weatherappwithcompose.screens.state_contents.InternetErrorContent
 import com.example.weatherappwithcompose.screens.state_contents.LoadingContent
+import com.example.weatherappwithcompose.ui.theme.app_theme.AppTheme
 import com.example.weatherappwithcompose.view_model.MainViewModel
 
 @Composable
@@ -22,18 +27,7 @@ fun HomeContent(viewModel: MainViewModel) {
                 if (weatherState.error.isNotBlank()) {
                     EmptyDataContent()
                 } else {
-                    Scaffold { contentPadding ->
-                        Box(
-                            modifier = Modifier
-                                .padding(contentPadding)
-                        ) {
-                            WeatherItem(
-                                temperature = "18C",
-                                description = weatherState.weather!!.daily[0].temp.day.toString(),
-                                date = "11/01/2021"
-                            )
-                        }
-                    }
+                    MainContent(weatherState)
                 }
             } else {
                 InternetErrorContent()
@@ -45,17 +39,33 @@ fun HomeContent(viewModel: MainViewModel) {
 }
 
 @Composable
-fun WeatherList() {
+fun MainContent(weatherState: WeatherState) {
+    Box(
+        modifier = Modifier
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        AppTheme.colors.primary,
+                        MaterialTheme.colors.primaryVariant
+                    )
+                )
+            )
+            .fillMaxHeight()
+    ) {
+        WeatherList(weatherState)
+    }
 }
 
-@Preview
 @Composable
-fun WeatherItemPreview() {
-    WeatherItem(temperature = "38c", "Windy", "12/12/2022", modifier = Modifier.padding(12.dp))
-}
-
-@Preview
-@Composable
-fun WeatherListPreview() {
-    WeatherList()
+fun WeatherList(weatherState: WeatherState) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        items(weatherState.weather!!.daily) { item ->
+            WeatherItem(
+                weather = item, timeZone = weatherState.weather.timezone
+            )
+        }
+    }
 }

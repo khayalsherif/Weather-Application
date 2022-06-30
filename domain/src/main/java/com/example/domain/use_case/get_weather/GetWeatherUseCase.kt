@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class GetWeatherUseCase @Inject constructor(
     private val weatherRepository: WeatherRepository
-) {
+    ) {
     operator fun invoke(): Flow<NetworkResult<Weather>> = flow {
         try {
             emit(NetworkResult.Loading())

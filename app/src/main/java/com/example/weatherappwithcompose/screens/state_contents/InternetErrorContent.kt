@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.weatherappwithcompose.ui.theme.Typography
+import com.example.weatherappwithcompose.ui.theme.app_theme.AppTheme
 
 @Preview
 @Composable
@@ -21,7 +21,7 @@ fun InternetErrorContent() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color.White),
+            .background(color = AppTheme.colors.white),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -29,10 +29,10 @@ fun InternetErrorContent() {
             imageVector = Icons.Default.Warning,
             contentDescription = "Warning Image",
             modifier = Modifier
-                .height(50.dp)
-                .width(50.dp),
-            colorFilter = ColorFilter.tint(color = Color.Red)
+                .height(AppTheme.dimensions.padding50)
+                .width(AppTheme.dimensions.padding50),
+            colorFilter = ColorFilter.tint(color = AppTheme.colors.error)
         )
-        Text(text = "Has not Internet", style = Typography.h5)
+        Text(text = "Has not Internet", style = AppTheme.typography.h5)
     }
 }
